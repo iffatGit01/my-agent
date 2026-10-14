@@ -1,0 +1,9 @@
+agent-framework
+agent-framework-openai
+azure-identity
+ddgs
+fastapi
+uvicorn
+python-dotenv
+pytest
+pytest-playwright
