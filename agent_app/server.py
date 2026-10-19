@@ -6,9 +6,11 @@ from pathlib import Path
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from .agent import build_agent
+from .browser_tool import browser
 
 load_dotenv()
 
@@ -23,10 +25,15 @@ class ChatRequest(BaseModel):
 async def lifespan(app: FastAPI):
     async with AsyncExitStack() as stack:
         app.state.agent = await build_agent(stack)
-        yield
+        try:
+            yield
+        finally:
+            await browser.close()
 
 
 app = FastAPI(lifespan=lifespan)
+(STATIC_DIR / "shots").mkdir(parents=True, exist_ok=True)
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 
 @app.get("/")

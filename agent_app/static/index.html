@@ -149,6 +149,7 @@
     .row.user .bubble { background: var(--user-bubble); color: #fff; border-bottom-right-radius: 6px; }
     .row.agent.error .bubble { background: var(--error-bg); color: var(--error); border: 1px solid var(--error); }
 
+    .shot { display: block; max-width: 100%; margin-top: .6rem; border-radius: 12px; border: 1px solid var(--border); }
     .meta { display: flex; gap: .6rem; align-items: center; font-size: .72rem; color: var(--muted); padding: 0 .3rem; }
     .meta button {
       border: 0; background: none; color: var(--muted); cursor: pointer; font-size: .72rem; padding: 0;
@@ -220,7 +221,7 @@
     <header>
       <div class="logo" aria-hidden="true">🤖</div>
       <div class="title">
-        <h1>My Agent</h1>
+        <h1>Easy Agent</h1>
         <small><span class="dot" aria-hidden="true"></span> Online &middot; ready to help</small>
       </div>
       <button class="icon-btn" id="clear" type="button" title="Clear chat" aria-label="Clear chat">🗑</button>
@@ -237,6 +238,7 @@
           <button class="chip" type="button" data-prompt="What's the weather in Tokyo?">🗼 Weather in Tokyo</button>
           <button class="chip" type="button" data-prompt="add 2 and 40">➕ Add 2 and 40</button>
           <button class="chip" type="button" data-prompt="What is WinSCP?">🔎 What is WinSCP?</button>
+          <button class="chip" type="button" data-prompt="Open https://example.com and tell me what it says">🌐 Open example.com</button>
         </div>
       </div>
     </section>
@@ -295,9 +297,27 @@
       const wrap = document.createElement("div");
       wrap.className = "bubble-wrap";
 
+      // A reply may contain the path of a screenshot taken by the browsing tool.
+      let shownText = text;
+      let shotPath = null;
+      if (role === "agent" && !opts.error) {
+        const found = text.match(/\/static\/shots\/[\w-]+\.png/);
+        if (found) { shotPath = found[0]; shownText = text.replace(found[0], "").trim(); }
+      }
+
       const bubble = document.createElement("div");
       bubble.className = "bubble";
-      bubble.textContent = text;
+      bubble.textContent = shownText;
+      if (shotPath) {
+        const link = document.createElement("a");
+        link.href = shotPath; link.target = "_blank"; link.rel = "noopener";
+        const img = document.createElement("img");
+        img.src = shotPath; img.alt = "Page screenshot"; img.className = "shot";
+        img.setAttribute("data-testid", "screenshot");
+        img.addEventListener("load", scrollDown);
+        link.appendChild(img);
+        bubble.appendChild(link);
+      }
 
       const meta = document.createElement("div");
       meta.className = "meta";

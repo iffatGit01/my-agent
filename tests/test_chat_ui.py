@@ -11,7 +11,7 @@ def ask(page: Page, base_url: str, question: str):
 
 def test_page_loads(page: Page, base_url):
     page.goto(base_url)
-    expect(page).to_have_title("My Agent")
+    expect(page).to_have_title("Easy Agent")
     expect(page.get_by_test_id("msg")).to_be_visible()
 
 
